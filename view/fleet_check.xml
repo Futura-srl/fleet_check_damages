@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <!-- Relativo alla visualizzazione della tabella ad alberlo -->
+    <record id="fleet_check_views_tree" model="ir.ui.view">
+        <field name="name">Modulo foto check</field>
+        <field name="model">fleet.check</field>
+        <field name="arch" type="xml">
+            <tree string="Modulo foto check<">
+                <field name="state"/>
+                <field name="damage"/>
+                <field name="fleet_check_photo_1_id"/>
+                <field name="fleet_check_photo_2_id"/>
+                <field name="fleet_check_photo_3_id"/>
+                <field name="fleet_check_photo_4_id"/>
+                <field name="fleet_check_photo_5_id"/>
+                <field name="fleet_check_photo_6_id"/>
+                <field name="fleet_check_photo_7_id"/>
+                <field name="fleet_check_photo_8_id"/>
+            </tree>
+        </field>
+    </record>
+    
+
+    <record id="fleet_check_views_form" model="ir.ui.view">
+        <field name="name">Modulo foto check</field>
+        <field name="model">fleet.check</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state"  widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <!-- <field name="name" invisible="1"/> -->
+                        <field name="damage"/>
+                        <field name="fleet_check_photo_1_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_2_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_3_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_4_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_5_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_6_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_7_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                        <field name="fleet_check_photo_8_id">
+                            <field name="datas" widget="many2many_kanban"/>
+                        </field>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="fleet_check" model="ir.actions.act_window">
+        <field name="name">Fleet Check</field>
+        <field name="res_model">fleet.check</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>
