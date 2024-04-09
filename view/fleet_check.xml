@@ -7,17 +7,18 @@
         <field name="name">Modulo foto check</field>
         <field name="model">fleet.check</field>
         <field name="arch" type="xml">
-            <tree string="Modulo foto check<">
+            <tree string="Modulo foto check">
                 <field name="state"/>
-                <field name="damage"/>
-                <field name="fleet_check_photo_1_id"/>
-                <field name="fleet_check_photo_2_id"/>
-                <field name="fleet_check_photo_3_id"/>
+                <field name="damage_ids"/>
+                <field name="fleet_check_photo_id"/>
+                <field name="fleet_check_photo_master_id"/>
+                <field name="trip_id"/>
+                <!-- <field name="fleet_check_photo_3_id"/>
                 <field name="fleet_check_photo_4_id"/>
                 <field name="fleet_check_photo_5_id"/>
                 <field name="fleet_check_photo_6_id"/>
                 <field name="fleet_check_photo_7_id"/>
-                <field name="fleet_check_photo_8_id"/>
+                <field name="fleet_check_photo_8_id"/> -->
             </tree>
         </field>
     </record>
@@ -34,38 +35,37 @@
                 <sheet>
                     <group>
                         <!-- <field name="name" invisible="1"/> -->
-                        <field name="damage"/>
-                        <field name="fleet_check_photo_1_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_2_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_3_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_4_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_5_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_6_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_7_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
-                        <field name="fleet_check_photo_8_id">
-                            <field name="datas" widget="many2many_kanban"/>
-                        </field>
+                        <field name="fleet_check_photo_id"/>
+                        <field name="fleet_check_photo_master_id"/>
+                        <field name="last_trip_fleet_check_photo_id"/>
+                        <field name="last_trip_fleet_check_photo_master_id"/>
+                        
+                        <field name="damage_ids" widget="many2many_tags"/>
+                        
+                        <field name="fleet_check_photo_url" invisible="1"/>
+                        <field name="fleet_check_photo_master_url" invisible="1"/>
+                        <field name="last_trip_fleet_check_photo_url" invisible="1"/>
+                        <field name="last_trip_fleet_check_photo_master_url" invisible="1"/>
+                        
+                        <group string="Original">
+                            <field name="fleet_check_photo_datas" widget="image_preview" attrs="{'invisible': [('fleet_check_photo_url', '!=', False)]}" label="datas"/>
+                            <field name="fleet_check_photo_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_url', '=', False)]}" label="url"/>
+                        </group>
+                        <group string="Master">
+                            <field name="fleet_check_photo_master_datas" widget="image_preview" attrs="{'invisible': [('fleet_check_photo_master_url', '!=', False)]}" label="datas"/>
+                            <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_master_url', '=', False)]}" label="url"/>
+                        </group>
+                        <group string="Last trip Original">
+                            <field name="fleet_check_photo_datas" widget="image_preview" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '!=', False)]}" label="datas"/>
+                            <field name="fleet_check_photo_url" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '=', False)]}" label="url"/>
+                        </group>
+                        <group string="Last trip Master">
+                            <field name="fleet_check_photo_master_datas" widget="image_preview" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '!=', False)]}" label="datas"/>
+                            <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '=', False)]}" label="url"/>
+                        </group>
+                        <field name="trip_id"/>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
             </form>
         </field>
     </record>
