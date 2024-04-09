@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+
+    <!-- Relativo alla visualizzazione della tabella ad alberlo -->
+    <record id="fleet_check_cam_views_tree" model="ir.ui.view">
+        <field name="name">Fleet check cam</field>
+        <field name="model">fleet.check.cam</field>
+        <field name="arch" type="xml">
+            <tree string="Fleet check cam">
+                <field name="name"/>
+                <field name="cam_code"/>
+                <field name="location"/>
+            </tree>
+        </field>
+    </record>
+    
+
+    <record id="fleet_check_cam_views_form" model="ir.ui.view">
+        <field name="name">Fleet check cam</field>
+        <field name="model">fleet.check.cam</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <!-- <field name="name" invisible="1"/> -->
+                        <field name="name"/>
+                        <field name="cam_code"/>
+                        <field name="location"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+
+    <record id="fleet_check_cam" model="ir.actions.act_window">
+        <field name="name">Fleet Check</field>
+        <field name="res_model">fleet.check.cam</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

@@ -15,4 +15,9 @@
     parent="survey.menu_surveys"
     name="Fleet Check"/>
 
+        <menuitem id="fleet_check_cam_menu_action"
+    action="fleet_check_cam"
+    parent="gtms.menu_gtms_configuration"
+    name="Fleet Check Cam"/>
+
 </odoo>
