@@ -5,7 +5,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class VehicleChecCamk(models.Model):
+class VehicleCheckCam(models.Model):
     _name = "fleet.check.cam"
     _description = "Fleet check cam"
     _inherit = "mail.thread"

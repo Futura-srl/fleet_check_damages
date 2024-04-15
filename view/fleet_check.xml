@@ -8,6 +8,10 @@
         <field name="model">fleet.check</field>
         <field name="arch" type="xml">
             <tree string="Modulo foto check">
+                <field name="id"/>
+                <field name="vehicle_id"/>
+                <field name="name"/>
+                <field name="fleet_check_photo_cam_id"/>
                 <field name="state"/>
                 <field name="damage_ids"/>
                 <field name="fleet_check_photo_id"/>
@@ -20,6 +24,7 @@
                 <field name="fleet_check_photo_7_id"/>
                 <field name="fleet_check_photo_8_id"/> -->
             </tree>
+            <filter name="group_employee" string="Remove Done" domain="[('state', '!=', 'done')]"/>
         </field>
     </record>
     
@@ -31,44 +36,121 @@
             <form>
                 <header>
                     <field name="state"  widget="statusbar" options="{'clickable': '1'}"/>
+                    <button name="fleet_check_set_older" string="Danni vecchi" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'new')]}"/>
+                    <button name="fleet_check_set_no_damages" string="Nessun danno" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'new')]}"/>
+                    <button name="fleet_check_reset" string="Reset" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'new')]}"/>
                 </header>
                 <sheet>
                     <group>
-                        <!-- <field name="name" invisible="1"/> -->
+                        <field name="name"/>
+                        <field name="trip_id"/>
+                        <field name="trip_processed"/>
+                        <field name="fleet_check_photo_cam_id" />
+                        <field name="vehicle_id" />
+                        <field name="last_trip_id" />
+                        <field name="name" invisible="1"/>
                         <field name="fleet_check_photo_id"/>
                         <field name="fleet_check_photo_master_id"/>
                         <field name="last_trip_fleet_check_photo_id"/>
                         <field name="last_trip_fleet_check_photo_master_id"/>
+                        <div class="o_row">
+                            <label for="original_bool" class="oe_inline"/>
+                            <field name="original_bool" widget="boolean_toggle" class="oe_inline"/>
+                        </div><br/>
+                        <div class="o_row">
+                            <label for="master_bool" class="oe_inline"/>
+                            <field name="master_bool" widget="boolean_toggle" class="oe_inline"/>
+                        </div><br/>
+                        <div class="o_row"> 
+                            <label for="all_bool" class="oe_inline"/>
+                            <field name="all_bool" widget="boolean_toggle" class="oe_inline"/>
+                        </div>
                         
-                        <field name="damage_ids" widget="many2many_tags"/>
+                        
+                        
+
+                    </group>
+                        <label for="no_damages"/>
+                        <field name="no_damages"/>
+                        <label for="older_damages"/>
+                        <field name="older_damages"/>
+                        <label for="damage_ids"/>
+                        <field name="damage_ids" widget="many2many_tags" string="New damages"/>
                         
                         <field name="fleet_check_photo_url" invisible="1"/>
                         <field name="fleet_check_photo_master_url" invisible="1"/>
                         <field name="last_trip_fleet_check_photo_url" invisible="1"/>
                         <field name="last_trip_fleet_check_photo_master_url" invisible="1"/>
-                        
-                        <group string="Original">
-                            <field name="fleet_check_photo_datas" widget="image_preview" attrs="{'invisible': [('fleet_check_photo_url', '!=', False)]}" label="datas"/>
-                            <field name="fleet_check_photo_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_url', '=', False)]}" label="url"/>
+                        <field name="last_trip_fleet_check_photo_id" invisible="1"/>
+                        <field name="last_trip_fleet_check_photo_master_id" invisible="1"/>
+                        <field name="older_damages" invisible="1"/>
+                    <group class="o_row" attrs="{'invisible': [('original_bool', '=', False)]}">
+                        <group string="Last trip Original" class="oe_inline">
+                                <field name="last_trip_fleet_check_photo_datas" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '!=', False)]}" nolabel="1" style="width: 350px;"/>
+                                <field name="last_trip_fleet_check_photo_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '=', False)]}" nolabel="1" style="width: 350px;"/>
                         </group>
-                        <group string="Master">
-                            <field name="fleet_check_photo_master_datas" widget="image_preview" attrs="{'invisible': [('fleet_check_photo_master_url', '!=', False)]}" label="datas"/>
-                            <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_master_url', '=', False)]}" label="url"/>
+                        <group string="Original" class="oe_inline">
+                                <field name="fleet_check_photo_datas" widget="image" attrs="{'invisible': [('fleet_check_photo_url', '!=', False)]}" nolabel="1" style="width: 350px;"/>
+                                <field name="fleet_check_photo_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_url', '=', False)]}" nolabel="1" style="width: 350px;"/>
                         </group>
-                        <group string="Last trip Original">
-                            <field name="fleet_check_photo_datas" widget="image_preview" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '!=', False)]}" label="datas"/>
-                            <field name="fleet_check_photo_url" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '=', False)]}" label="url"/>
+                        <group string="Open damages" class="oe_inline">
+                            <field name="damages_open_ids" class="oe_inline" string="">
+                                <tree>
+                                    <field name="damage_type_id" string="Damages"/>
+                                    <field name="event_date" string="Event date"/>
+                                </tree>
+                            </field>
                         </group>
-                        <group string="Last trip Master">
-                            <field name="fleet_check_photo_master_datas" widget="image_preview" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '!=', False)]}" label="datas"/>
-                            <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '=', False)]}" label="url"/>
+                        <!-- <t string="Master" attrs="{'invisible': [('master_bool', '=', False)]}">
+                                <field name="fleet_check_photo_master_datas" widget="image" attrs="{'invisible': [('fleet_check_photo_master_url', '!=', False)]}" nolabel="1" style="width: 500px;"/>
+                                <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 500px;"/>
+                        </t>
+                        <group string="Last trip Master" attrs="{'invisible': [('master_bool', '=', False)]}">
+                                <field name="fleet_check_photo_master_datas" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '!=', False)]}" nolabel="1" style="width: 100px;"/>
+                                <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 100px;"/>
+                        </group> -->
+                    </group>
+                    <group class="o_row" attrs="{'invisible': [('master_bool', '=', False)]}">
+                        <group string="Last trip Master" class="oe_inline">
+                                <field name="last_trip_fleet_check_photo_master_datas" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '!=', False)]}" nolabel="1" style="width: 400px;"/>
+                                <field name="last_trip_fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 400px;"/>
                         </group>
-                        <field name="trip_id"/>
+                        <group string="Master" class="oe_inline">
+                                <field name="fleet_check_photo_master_datas" widget="image" attrs="{'invisible': [('fleet_check_photo_master_url', '!=', False)]}" nolabel="1" style="width: 400px;"/>
+                                <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 400px;"/>
+                        </group>
+                        <group string="Open damages" class="oe_inline">
+                            <field name="damages_open_ids" class="oe_inline" string="">
+                                <tree>
+                                    <field name="damage_type_id" string="Damages"/>
+                                    <field name="event_date" string="Event date"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <!-- <div>
+                            <span>Open damages</span>
+                            <field name="damage_ids" nolabel="1" string="Open damages" readonly="1" clickable="False"/>
+                        </div> -->
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
+
+    <!-- <record id="action_bt_overtime_management" model="ir.actions.act_window">
+        <field name="name">Overtime</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">bt.hr.overtime</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'state':'done'}</field>
+        <field name="search_view_id" ref="bt_overtime_management_search"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Create Overtime Request
+            </p>
+        </field>
+    </record> -->
 
 
 

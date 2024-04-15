@@ -20,4 +20,9 @@
     parent="gtms.menu_gtms_configuration"
     name="Fleet Check Cam"/>
 
+        <menuitem id="fleet_check_import_log_menu_action"
+    action="fleet_check_import_log"
+    parent="survey.menu_surveys"
+    name="Fleet Check Import Log"/>
+
 </odoo>
