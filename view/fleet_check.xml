@@ -17,14 +17,28 @@
                 <field name="fleet_check_photo_id"/>
                 <field name="fleet_check_photo_master_id"/>
                 <field name="trip_id"/>
-                <!-- <field name="fleet_check_photo_3_id"/>
-                <field name="fleet_check_photo_4_id"/>
-                <field name="fleet_check_photo_5_id"/>
-                <field name="fleet_check_photo_6_id"/>
-                <field name="fleet_check_photo_7_id"/>
-                <field name="fleet_check_photo_8_id"/> -->
             </tree>
-            <filter name="group_employee" string="Remove Done" domain="[('state', '!=', 'done')]"/>
+        </field>
+    </record>
+
+    <record id="fleet_check_view_search" model="ir.ui.view">
+        <field name="name">fleet.check.view.search.module.name</field>
+        <field name="model">fleet.check</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="vehicle_id"/>
+                <field name="name"/>
+                <field name="fleet_check_photo_cam_id"/>
+                <field name="state"/>
+                <field name="damage_ids"/>
+                <field name="fleet_check_photo_id"/>
+                <field name="fleet_check_photo_master_id"/>
+                <field name="trip_id"/>
+                <filter name="state_done" string="Remove Done" domain="[('state', '!=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Trip" name="trip_id" context="{'group_by': 'trip_id'}"/>
+                </group>
+            </search>
         </field>
     </record>
     
