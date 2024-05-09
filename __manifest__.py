@@ -8,6 +8,10 @@
         'survey',
         'gtms',
         'fleet_service_with_deduction',
+        'hr',
+        'fleet',
+        'automatic_fleet_management',
+        'hr',
         ],
     'data': [
         # # # Settaggi per accesso ai contenuti

@@ -174,4 +174,20 @@
         <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="model_fleet_check_danni" model="ir.actions.server">
+        <field name="name">Check danni</field>
+        <field name="model_id" ref="fleet_check_damages.model_fleet_check"/>
+        <field name="binding_model_id" ref="fleet_check_damages.model_fleet_check"/>
+        <field name="state">code</field>
+        <field name="code">records.check_all_cams()</field>
+    </record>
+    
+    <!-- <record id="model_fleet_check_danni" model="ir.actions.server">
+        <field name="name">TEST Check danni</field>
+        <field name="model_id" ref="fleet_check_damages.model_fleet_check"/>
+        <field name="binding_model_id" ref="fleet_check_damages.model_fleet_check"/>
+        <field name="state">code</field>
+        <field name="code">records.test_fleet_check()</field>
+    </record> -->
+
 </odoo>

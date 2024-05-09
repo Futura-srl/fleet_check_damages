@@ -244,26 +244,38 @@ class VehicleCheck(models.Model):
     # Se tutti gli stati sono != 'new' e almeno uno è = 'damages' per ogni cam vedo i danni rilevati e creo un'anomalia con quei dati (tipologia danno, data evento)
 
 
+    
     def check_all_cams(self):
-        trips_not_processed = self.env['fleet.check'].search_read([('trip_processed', '=', False)], ['trip_id'])
+        _logger.info(self)
+        
+        trips_not_processed = []
+        _logger.info(self)
+        for record in self:
+            _logger.info(f"record.trip_processed {record.trip_processed}")
+            _logger.info(f"record.trip_processed {record}")
+            if record.trip_processed == True:
+                continue
+            else:
+               trips_not_processed.append(record.id) 
+        # trips_not_processed = self.env['fleet.check'].search_read([('trip_processed', '=', False)], ['trip_id'])
         unique_values = trips_not_processed
         unique_values = list(unique_values)
         _logger.info(f'STAMPO trips_not_processed\n{trips_not_processed}')
         _logger.info(f'STAMPO unique_values\n{unique_values}')
         trips = []
         for trip in trips_not_processed:
-            trips.append(trip['trip_id'][0])
+            trips.append(trip)
         trips_not_processed_unique = list(set(trips))
-        trips = []
+        # trips = []
         trips_with_new_damages = []
         trips_with_no_new_damages = []
         _logger.info(trips_not_processed_unique)
         
         # Per ogni viaggio controllo se ci sono cam con ancora lo stato in 'new'
         for trip_not_processed in trips_not_processed_unique:
-            is_trip_not_processable = self.env['fleet.check'].search([('trip_id', '=', trip_not_processed), ('state', '=', 'new')])
+            is_trip_not_processable = self.env['fleet.check'].search([('id', '=', trip_not_processed), ('state', '=', 'new')])
             _logger.info(f'is_trip_not_processable = {is_trip_not_processable.trip_id}')
-            cams_not_new = self.env['fleet.check'].search([('trip_id', '=', trip_not_processed)])
+            cams_not_new = self.env['fleet.check'].search([('id', '=', trip_not_processed)])
             _logger.info(f'cams_not_new = {cams_not_new}')
             _logger.info
             if not is_trip_not_processable:
@@ -272,30 +284,41 @@ class VehicleCheck(models.Model):
         _logger.info("STAMPO VIAGGI CON CAMS state != 'new' and trip_processed == False")
         trips = list(set(trips))
         _logger.info(trips)
-        
+
+
+        is_trips_with_damages = []
         # Per ogni viaggio controllo se ci sono cam con lo stato 'damages'
         for trip_not_processed in trips:
             _logger.info(f'STAMPO trip_not_processed {trip_not_processed}')
-            is_trips_with_damages = self.env['fleet.check'].search([('trip_id', '=', trip_not_processed), ('state', '=', 'damages')])
+            is_trips_with_damages.append(self.env['fleet.check'].search([('id', '=', trip_not_processed), ('state', '=', 'damages')]))
             _logger.info(f'is_trips_with_damages = {is_trips_with_damages}')
             if not is_trips_with_damages:
-                trips_with_no_new_damages.append(trip['trip_id'][0])
+                self.env['fleet.check'].search([('id', '=', trip_not_processed)],['trip_id'])
+                # trips_with_no_new_damages.append(trip_not_processed['trip_id'])
+                trips_with_no_new_damages.append(self.env['fleet.check'].search([('id', '=', trip_not_processed)]))
             else:
                 for is_trip_with_damages in is_trips_with_damages:
-                    _logger.info(f'is_trip_with_damages = {is_trip_with_damages}')
+                    _logger.info(f'is_trip_with_damages = {is_trip_with_damages.trip_id}')
+                    _logger.info(self.env['fleet.check'].search([('id', '=', trip_not_processed)])[0].trip_id)
                     if is_trip_with_damages:
-                        _logger.info(f"STAMPO trip {trip['trip_id'][0]}")
-                        _logger.info(f"STAMPO is_trip_with_damages {is_trip_with_damages['trip_id']['id']}")
-                        if trip['trip_id'][0] == is_trip_with_damages['trip_id']['id']:
-                            trips_with_new_damages.append(trip['trip_id'][0])
-        
-        trips_with_new_damages = set(trips_with_new_damages)        
+                        _logger.info(f"STAMPO trip {self.env['fleet.check'].search([('id', '=', trip_not_processed)])}")
+                        _logger.info(f"STAMPO is_trip_with_damages {is_trip_with_damages.trip_id.id}")
+                        trip_id = self.env['fleet.check'].search([('id', '=', is_trip_with_damages.id)])
+                        _logger.info(trip_id.trip_id.id)
+                        if trip_id.trip_id.id == is_trip_with_damages.trip_id.id:
+                            trips_with_new_damages.append(self.env['fleet.check'].search([('id', '=', trip_not_processed)]))
+                            _logger.info(f"Ho aggiunto un danno : {self.env['fleet.check'].search([('id', '=', trip_not_processed)])}")
+
+        trips_with_new_damages = set(trips_with_new_damages)
+        trips_id = []
+        for t_id in trips_with_new_damages:
+            trips_id.append(t_id.trip_id)
         trips_with_no_new_damages = set(trips_with_no_new_damages)        
         _logger.info(f'STAMPO VIAGGI CON DANNO {trips_with_new_damages}')
         _logger.info(f'STAMPO VIAGGI SENZA DANNO {trips_with_no_new_damages}')
-        for danno in trips_with_new_damages:
-            _logger.info(f"Creo un'anomalia per questo viaggio -> {danno}")
-            cams = self.env['fleet.check'].search([('trip_id', '=', danno)])
+        for danno in trips_id:
+            _logger.info(f"Creo un'anomalia per questo viaggio -> {danno.id}")
+            cams = self.env['fleet.check'].search([('trip_id', '=', danno.id)])
             self.add_new_deduction(danno)
             for cam in cams:
                 # Inserire funzione che crea anomalia e che metta la cam del viaggio come processata
@@ -311,12 +334,14 @@ class VehicleCheck(models.Model):
 
     # Funzione per creare un'anomalia
     def add_new_deduction(self, danno):
-        cams = self.env['fleet.check'].search([('trip_id', '=', danno)])
-        trip = self.env['gtms.trip'].search([('id', '=', danno)])
+        _logger.info(f"STAMPO DANNO {danno.id}")
+        cams = self.env['fleet.check'].search([('trip_id', '=', danno.id)])
+        trip = self.env['gtms.trip'].search([('id', '=', danno.trip_id.id)])
         data = {}
         reparation = list([])
         documents = list([])
         for cam in cams:
+            _logger.info('start add_new_deduction')
             _logger.info(trip[0])
             _logger.info(trip[0].first_stop_planned_at.strftime("%Y-%m-%d"))
             if cam.damage_ids.id == False:
@@ -324,22 +349,22 @@ class VehicleCheck(models.Model):
             else:
                 reparation.append((0, 0, {'damage_type_id': cam.damage_ids.id, 'state': 'open', 'date': trip[0].first_stop_planned_at.strftime("%Y-%m-%d") }))
                 if cam.fleet_check_photo_id.url:
-                    _logger.info(self.env['documents.document'].search([('attachment_id', '=', 257272)]))
-                    documents.append((0, 0, {'attachment_id': (0,0, {'type': 'url',  'name': cam.fleet_check_photo_id.name, 'url': cam.fleet_check_photo_id.url}), 'tag_ids': [59], 'name': cam.fleet_check_photo_id.name, 'folder_id': 4, 'type': 'url' }))
+                    _logger.info(self.env['documents.document'].search([('attachment_id', '=', cam.fleet_check_photo_id.id)]))
+                    documents.append((0, 0, {'attachment_id': cam.fleet_check_photo_id.id, 'tag_ids': [59], 'name': cam.fleet_check_photo_id.name, 'folder_id': 4, 'type': 'url' }))
                 else:
-                    documents.append((0, 0, {'attachment_id': 257272, 'tag_ids': [59], 'name': cam.fleet_check_photo_id.name, 'folder_id': 4, 'type': 'binary' }))
+                    documents.append((0, 0, {'attachment_id': cam.fleet_check_photo_id.id, 'tag_ids': [59], 'name': cam.fleet_check_photo_id.name, 'folder_id': 4, 'type': 'binary' }))
         _logger.info(reparation)
         _logger.info(documents)
         current_date = datetime.now()
         data = {
             'description': "Anomalia ",
             'service_type_id': 9,
-            'date': trip[0].first_stop_planned_at.strftime("%Y-%m-%d %H:%M:%S"), # data evento
+            'date': danno.trip_id.first_stop_planned_at.strftime("%Y-%m-%d %H:%M:%S"), # data evento
             'amount': 0.0,
-            'trip_id': danno,
-            'vehicle_id': trip[0].current_fleet_id.id,
-            'purchaser_id': trip[0].current_driver_id.id,
-            'company_id': trip[0].company_ids[0].id,
+            'trip_id': danno.trip_id.id,
+            'vehicle_id': danno.trip_id.current_fleet_id.id,
+            'purchaser_id': danno.trip_id.current_driver_id.id,
+            'company_id': danno.trip_id.company_ids[0].id,
             'responsibility': False,
             'repair_mode': False,
             'start_date': current_date, # Orario creazione anomalia
@@ -349,6 +374,7 @@ class VehicleCheck(models.Model):
         _logger.info(data)
         create_service = self.env['fleet.vehicle.log.services'].create(data)
         _logger.info(f"HO CREATO ANOMALIA CON ID = {create_service}")
+        self.create_reminder(create_service)
 
 
     def import_photo_check(self):
@@ -447,4 +473,43 @@ class VehicleCheck(models.Model):
             if os.path.isfile(filepath):
                 _logger.info(f"File trovato: {filepath}")
         
- 
+    def test_fleet_check(self):
+        _logger.info(f"TEST DELLA FUNZIONE FLEET CHECK")
+        _logger.info(self)
+        for record in self:
+            _logger.info(record)
+        
+    def create_reminder(self, res):
+        _logger.info(f"Stampo il fottuto self {res.id}")
+        # Il cdc va pescato dal viaggio associato o (come seconda opzione) dal contratto di disponibilità
+        # Verifico se ci sono viaggi associati
+        if res[0]['trip_id'] != False: 
+            # Recupero il cdc associato al viaggio
+            _logger.info("CERCO L'ID CDC")
+            cdc_id = self.env['gtms.trip'].search_read([('id', '=', res[0]['trip_id'].id)], ['organization_id'])
+        else:
+            # recupero il cdc dall'ultimo contratto di disponibilità
+            cdc_id = self.env['fleet.vehicle.log.contract'].search_read([('vehicle_id', '=', res[0]['vehicle_id']), ('cost_subtype_id', '=', 47)], order='id desc',limit=1)
+        helpdesk_id = self.env['helpdesk.team'].search_read([('organization_id', '=', cdc_id[0]['organization_id'][0])])
+    
+        if not helpdesk_id:
+            raise ValidationError(_("Errore nella creazione dell'anomalia e del reminder. Non sei un ROP autorizzato. Per farsi aggiungere contattare raffaele.tesolin@futurasl.com o il 351/7676798."))
+        
+        _logger.info(cdc_id[0]['organization_id'][0])
+        _logger.info(helpdesk_id)
+        service_type = res.env['fleet.vehicle.log.services'].search_read([('id', '=', res.id)])
+        _logger.info(service_type[0]['service_type_id'][0])
+        if service_type[0]['service_type_id'][0] == 9:
+            _logger.info("DEVO CREARE UN REMINDER")
+            for user in helpdesk_id[0]['message_partner_ids']:
+                user_id = self.env['res.users'].search_read([('partner_id', '=', user)], ['id'])
+                _logger.info(user_id[0]['id'])
+                alert = self.env['mail.activity'].create({
+                    'res_name': 'Completamento sinistro ' + str(res['id']),
+                    'activity_type_id': 26,
+                    'user_id': user_id[0]['id'],
+                    'res_model_id': 383, # id di fleet.vehicle.log.service
+                    'res_id': res['id'],
+                    'note': "<p style='margin-bottom:0px'>Per procedere allo step 'Segnalato' il sinistro deve essere completato con le seguenti informazioni:</p><ul style='margin-bottom:0px'><li>Modulo dichiarazione danno</li><li>Note descrittive</li></ul><li>Eventuale CID</li><li>Eventuali foto</li>"
+                })
+                _logger.info(alert)
