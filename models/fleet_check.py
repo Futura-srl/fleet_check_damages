@@ -1,6 +1,6 @@
 from odoo import fields, models, api
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 import os, csv, base64
 
 
@@ -17,6 +17,7 @@ class VehicleCheck(models.Model):
     state = fields.Selection([('new','New'),('damages','With Damages'),('done','No Damages'),('old','Older')], default='new', compute='_update_state_fleet_check', store=True)
     damage_ids= fields.Many2many('fleet.damage.type', 'name')
     trip_id = fields.Many2one('gtms.trip', string="Trip")
+    datetime_trip_id = fields.Datetime(compute='_compute_datetime_trip_id', store=True)
     vehicle_id = fields.Many2one('fleet.vehicle', compute='_compute_vehicle_id', store=True)
     older_damages = fields.Boolean()
     no_damages = fields.Boolean()
@@ -89,6 +90,33 @@ class VehicleCheck(models.Model):
     # fleet_check_photo_8_datas = fields.Binary(string="Foto 8 Datas", compute='_compute_fleet_check_photo_8_datas')
     # fleet_check_photo_8_state = fields.Many2one()
     # fleet_check_photo_8_cam = fields.Char()
+
+
+    # # funzione per sapere (lato server) quali record sono ancora da gestire, per convenzione saranno mostrati tutti i record in ordine di data viaggio e stato =
+    # def record_to_check(self):
+    #     records = self.env['fleet.check'].search_read([('state', '=', 'new')], ['trip_id'])
+    #     _logger.info(records)
+    #     all_records = []
+    #     for record in records:
+    #         all_records.append(record['trip_id'][0])
+
+    #     _logger.info("Lista di tutti i record ancora da controllare in ordine di data viaggio")
+    #     _logger.info(all_records)
+    #     records = self.env['gtms.trip'].search([('id', 'in', all_records)], order="first_stop_planned_at asc")
+    #     _logger.info(records)
+    #     break
+    #     return records
+
+
+    # Recupero il datetime del viaggio associato
+    @api.depends('trip_id')
+    def _compute_datetime_trip_id(self):
+        for record in self:
+            test = self.env['gtms.trip'].search_read([('id', '=', record.trip_id.id)], ['first_stop_planned_at'])
+            record.datetime_trip_id = test[0]['first_stop_planned_at']
+            # _logger.info('first_stop_planned_at')
+            # _logger.info(test[0]['first_stop_planned_at'])
+
     
     # Recupero datas della foto original
     @api.depends('fleet_check_photo_id')
@@ -119,14 +147,14 @@ class VehicleCheck(models.Model):
     # Recupero datas della foto original del viaggio precedente
     @api.depends('last_trip_fleet_check_photo_id')
     def _compute_last_trip_fleet_check_photo_datas(self):
-        _logger.info("Provo 4")
+        # _logger.info("Provo 4")
         for record in self:
             record.last_trip_fleet_check_photo_datas = record.last_trip_fleet_check_photo_id.datas if record.last_trip_fleet_check_photo_id else False
     
     # Recupero url della foto original del viaggio precedente 
     @api.depends('last_trip_fleet_check_photo_id')
     def _compute_last_trip_fleet_check_photo_url(self):
-        _logger.info("Provo 3")
+        # _logger.info("Provo 3")
         for record in self:
             record.last_trip_fleet_check_photo_url = record.last_trip_fleet_check_photo_id.url if record.last_trip_fleet_check_photo_id else False
     
@@ -134,14 +162,14 @@ class VehicleCheck(models.Model):
     # Recupero datas della foto master del viaggio precedente
     @api.depends('last_trip_fleet_check_photo_master_id')
     def _compute_last_trip_fleet_check_photo_master_datas(self):
-        _logger.info("Provo 2")
+        # _logger.info("Provo 2")
         for record in self:
             record.last_trip_fleet_check_photo_master_datas = record.last_trip_fleet_check_photo_master_id.datas if record.last_trip_fleet_check_photo_master_id else False
     
     # Recupero url della foto master del viaggio precedente   
     @api.depends('last_trip_fleet_check_photo_master_id')
     def _compute_last_trip_fleet_check_photo_master_url(self):
-        _logger.info("Provo 1")
+        # _logger.info("Provo 1")
         
         for record in self:
             record.last_trip_fleet_check_photo_master_url = record.last_trip_fleet_check_photo_master_id.url if record.last_trip_fleet_check_photo_master_id else False
@@ -150,8 +178,8 @@ class VehicleCheck(models.Model):
     @api.depends('trip_id')
     def _compute_vehicle_id(self):
         for record in self:
-            _logger.info("_compute_vehicle_id")
-            _logger.info(f"{record.trip_id.current_fleet_id.id}")
+            # _logger.info("_compute_vehicle_id")
+            # _logger.info(f"{record.trip_id.current_fleet_id.id}")
             record.vehicle_id = record.trip_id.current_fleet_id.id
             # _logger.info(f"STAMPO LA TARGA = {self.trip_id.current_fleet_id}")
             # self.vehicle_id = self.trip_id.current_fleet_id
@@ -161,60 +189,64 @@ class VehicleCheck(models.Model):
     @api.depends('trip_id')
     def _compute_last_trip_id(self):
         for record in self:
-            _logger.info("_compute_last_trip_id")
+            # _logger.info("_compute_last_trip_id")
             record.last_trip_id = self.env['gtms.trip'].search([('current_fleet_id', '=', record.trip_id.current_fleet_id.id), ('first_stop_planned_at', '<', record.trip_id.first_stop_planned_at)], limit=1, order="id desc")
-            _logger.info(f" STAMPO IL VIAGGIO ESEGUITO PRECEDENTEMENTE CON QUESTO MEZZO = {record.last_trip_id.id}")
+            # _logger.info(f" STAMPO IL VIAGGIO ESEGUITO PRECEDENTEMENTE CON QUESTO MEZZO = {record.last_trip_id.id}")
     
     ################# Funzione per recuperare le foto original del viaggio precedente
-    @api.depends('last_trip_id')
+    @api.depends('last_trip_id', 'fleet_check_photo_cam_id')
     def _compute_last_trip_fleet_check_photo_id(self):
         for record in self:
-            _logger.info(f"VIAGGIO PRECEDENTE = {record.last_trip_id.id}")
-            record.last_trip_fleet_check_photo_id = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id)]).fleet_check_photo_id
+            # _logger.info(f"VIAGGIO PRECEDENTE = {record.last_trip_id.id}")
+            record.last_trip_fleet_check_photo_id = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id),('fleet_check_photo_cam_id', '=', record.fleet_check_photo_cam_id.id)]).fleet_check_photo_id
             # Cerco il record id foto associato al viaggio precedente
-            _logger.info("_compute_last_trip_fleet_check_photo_id")
-            test = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id)]).fleet_check_photo_master_id
-            _logger.info(test)
-            _logger.info(record.last_trip_fleet_check_photo_id)
-            _logger.info(record.last_trip_fleet_check_photo_id.datas)
-            _logger.info(record.last_trip_fleet_check_photo_id.url)
+            # _logger.info("_compute_last_trip_fleet_check_photo_id")
+            test = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id),('fleet_check_photo_cam_id', '=', record.fleet_check_photo_cam_id.id)])
+            # _logger.info("Test foto viaggio precedente! original")
+            # _logger.info(test.fleet_check_photo_cam_id)
+            # _logger.info(record.last_trip_fleet_check_photo_id)
+            # _logger.info(record.last_trip_fleet_check_photo_id.datas)
+            # _logger.info(record.last_trip_fleet_check_photo_id.url)
             
     ################# Funzione per recuperare le foto master del viaggio precedente
-    @api.depends('last_trip_id')
+    @api.depends('last_trip_id', 'fleet_check_photo_cam_id')
     def _compute_last_trip_fleet_check_photo_master_id(self):
         for record in self:
-            test = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id)]).fleet_check_photo_master_id
-            record.last_trip_fleet_check_photo_master_id = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id)]).fleet_check_photo_master_id
+            test = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id)])
+            record.last_trip_fleet_check_photo_master_id = self.env['fleet.check'].search([('trip_id', '=', record.last_trip_id.id),('fleet_check_photo_cam_id', '=', record.fleet_check_photo_cam_id.id)]).fleet_check_photo_master_id
             # Cerco il record id foto associato al viaggio precedente
-            _logger.info("_compute_last_trip_fleet_check_photo_master_id")
-            _logger.info(test)
+            # _logger.info("_compute_last_trip_fleet_check_photo_master_id")
+            # _logger.info("Test foto viaggio precedente!")
+            # _logger.info(test.fleet_check_photo_cam_id)
             
     
     ################# 
     @api.depends('trip_id')
     def _compute_damages_open(self):
         for record in self:
-            _logger.info("_compute_damages_open")
-            test = self.env['reparation.reparation'].search([('fleet_id', '=', record.vehicle_id.id), ('state', '=', 'open'), ('fleet_vehicle_log_service_id.date', '<', record.trip_id.first_stop_planned_at)], order="event_date desc")
+            # _logger.info("_compute_damages_open")
+            test = self.env['reparation.reparation'].search([('fleet_id', '=', record.vehicle_id.id), ('state', '=', 'open'), ('fleet_vehicle_log_service_id.date', '<=', record.trip_id.first_stop_planned_at)], order="event_date desc")
             record.damages_open_ids = [reparation.id for reparation in test]  # Estrai gli ID dalla lista di record
-            _logger.info(record.damages_open_ids)
+            if record.damages_open_ids == []:
+                record.damages_open_ids = None
+            # _logger.info(record.damages_open_ids)
 
 
     @api.depends('damage_ids', 'older_damages', 'no_damages')
     def _update_state_fleet_check(self):
         for record in self:
-            _logger.info(f"STAMPO damage_ids = {record.damage_ids}")
+            # _logger.info(f"STAMPO damage_ids = {record.damage_ids}")
             if record.damage_ids:
-                _logger.info(f"Ci sono danni")
+                # _logger.info(f"Ci sono danni")
                 record.state = 'damages'
             elif record.older_damages == True:
-                _logger.info(f"Sono danni vecchi")
+                # _logger.info(f"Sono danni vecchi")
                 record.state = 'old'
             elif record.no_damages == True:
-                _logger.info(f"Non ci sono danni")
+                # _logger.info(f"Non ci sono danni")
                 record.state = 'done'
             else:
-                _logger.info(f"Da controllare")
+                # _logger.info(f"Da controllare")
                 record.state = 'new'
                 
             
@@ -225,11 +257,31 @@ class VehicleCheck(models.Model):
         for record in self:
             _logger.info(f"Sono danni vecchi")
             record.older_damages = True
+            next_record = self.env['fleet.check'].search([('state', '=', 'new')], order="datetime_trip_id asc", limit=1)
+            _logger.info(next_record)
+            if next_record:
+                return {
+                'type': 'ir.actions.act_window',
+                'name': 'Fleet Check',
+                'view_mode': 'form',
+                'res_model': 'fleet.check',
+                'res_id': next_record[0].id
+            }
 
     def fleet_check_set_no_damages(self):
         for record in self:
             _logger.info(f"Non ci sono danni")
             record.no_damages = True
+            next_record = self.env['fleet.check'].search([('state', '=', 'new')], order="datetime_trip_id asc", limit=1)
+            _logger.info(next_record)
+            if next_record:
+                return {
+                'type': 'ir.actions.act_window',
+                'name': 'Fleet Check',
+                'view_mode': 'form',
+                'res_model': 'fleet.check',
+                'res_id': next_record[0].id
+            }
             
     def fleet_check_reset(self):
         for record in self:
@@ -384,7 +436,7 @@ class VehicleCheck(models.Model):
         _logger.info("PARTO ALLA RICERCA DEL CSV")
         # Percorso della directory da scansionare
         directory = "./photo-check/"
-
+        _logger.info(os.walk(directory))
         # Scansione ricorsiva della directory e delle sottodirectory
         for root, dirs, files in os.walk(directory):
             _logger.info("Scansione della directory: %s", root)
@@ -439,31 +491,126 @@ class VehicleCheck(models.Model):
                     if len(riga) >= 4:
                         camera = riga[0]
                         datetime_csv = datetime.strptime(riga[1], '%Y%m%d%H%M%S')
+                        date_trip = datetime.strptime(riga[1], '%Y%m%d%H%M%S').date()
+                        start_of_day = date_trip
+                        end_of_day = date_trip + timedelta(days=1)
                         esito = riga[2] == "True"
                         photo_name = riga[3]
                         errore = riga[4]
-        
+
+                        fleet_id = None
+                        filename = file
+                        # Divide la stringa sul simbolo '_'
+                        parts = filename.split('_')
+                        # Prende la seconda parte e rimuove l'estensione '.csv'
+                        license_plate = parts[1].replace('.csv', '')
+
+                        fleet = self.env['fleet.vehicle'].search([('license_plate', '=', license_plate)])
+                        if fleet != []:
+                            fleet_id = fleet.id
+
+                            # Recupero il viaggio associato al mezzo e con data inizio 
+                            # Cerco tutti i viaggi eseguiti con il mezzo specifico nella data specifica
+                            # Il viaggio che poi mi interessa è trip_start_from_survey <= datetime_csv, trip_start_from_survey >= datetime_csv oppure trip_start_from_survey <= datetime_csv, trip_start_from_survey == False
+                            trips = self.env['gtms.trip'].search([('current_fleet_id', '=', fleet_id), ('trip_start_from_survey', '>=', start_of_day), ('trip_start_from_survey', '<', end_of_day)])
+                            trip_id = self.env['gtms.trip'].search([('id', 'in', trips.ids), ('trip_start_from_survey', '<=', datetime_csv), ('trip_end_from_survey', '>=', datetime_csv)])
+                            _logger.info(trips)
+                            _logger.info(trip_id)
+                            if len(trip_id) != 1:
+                                trip_id = None
+                            # '|', ('trip_start_from_survey', '<=', datetime_csv), ('trip_start_from_survey', '=', False)
                         _logger.info("Photo name: %s", photo_name)
+                        _logger.info("Targa: %s, fleet_id %s", license_plate, fleet_id)
                         _logger.info("Camera: %s", camera)
                         _logger.info("Datetime_csv: %s", datetime_csv)
                         _logger.info("Esito: %s", esito)
                         _logger.info("Errore: %s", errore)
-        
+                        
+                        cam = self.env['fleet.check.cam'].search_read([('cam_code', '=', camera)])
+                        cam_id = None
+                        # _logger.info(cam[0]['id'])
+
+                        if cam != []:
+                            cam_id = cam[0]['id']
+
                         data = {
                             'name': file,
+                            'cam_code': cam_id,
                             'datetime_photo': str(datetime_csv),
                             'photo_name': photo_name,
                             'esito': esito,
                             'cam_error': errore,
                             'attachment_csv_id': file_id.id,
+                            'fleet_id': fleet_id,
+                            'trip_id': trip_id.id,
                         }
                         log = self.env['fleet.check.import.log'].create(data)
                         _logger.info(log)
 
         # Dopo aver gestito il file viene eliminato
         os.remove(file_csv)
-        _logger.info("File CSV eliminato: %s", file_csv)     
+        _logger.info("File CSV eliminato: %s", file_csv) 
 
+
+    # Funzione per importare le foto nel db e l'eliminazione del file fisico dalla cartella
+    # Controllo nella tabella fleet.check.import.log se ci sono record con export_processed == False, esito == True, export_processed == False e state == 'new'
+    # I record trovati saranno quelli da importare nel db
+    # L'importazione avverrà in automatico con la creazione del fleet.check (ovvero un record per foto)
+    def import_photo_to_fleet_check(self):
+        all_records = self.env['fleet.check.import.log'].search([('export_processed', '=', False), ('esito', '=', True), ('state', '=', 'new')], order="trip_id asc")
+        for record in all_records:
+            # Carico la foto in attachment e poi la associo al fleet_check
+            foto_id = self.get_base64_photo_and_upload(record.photo_name)
+            data = {
+                'vehicle_id': record.fleet_id.id,
+                'trip_id': record.trip_id.id,
+                'original_bool': True,
+                'fleet_check_photo_id': foto_id,
+                'name': 'test',
+            }
+            check = self.env['fleet.check'].create(data)
+            record.export_processed = True
+
+    # Funzione per ottenere il base64 di una foto e caricarla in ir.attachment
+    def get_base64_photo_and_upload(self, photo_name):
+        current_directory = os.getcwd()
+        _logger.info(f"The current working directory is: {current_directory}")
+        _logger.info("PARTO ALLA RICERCA DELLA FOTO")
+    
+        # Percorso della directory da scansionare
+        directory = "./photo-check/"
+    
+        # Percorso completo del file
+        file_path = os.path.join(directory, photo_name)
+    
+        # Verifica se il file esiste
+        if os.path.isfile(file_path):
+            _logger.info("File trovato: %s", file_path)
+    
+            # Legge il contenuto del file
+            with open(file_path, "rb") as file:
+                file_content = file.read()
+    
+            # Codifica in base64 il contenuto in bytes
+            file_base64 = base64.b64encode(file_content).decode('utf-8')
+    
+            _logger.info("Base64 del file: %s", file_base64)
+    
+            # Faccio l'upload nella tabella ir.attachment di odoo del file csv
+            data = {
+                'name': photo_name, 
+                'type': 'binary', 
+                'datas': file_base64, 
+            }
+            file_id = self.env['ir.attachment'].create(data)
+    
+            _logger.info("File caricato con ID: %s", file_id.id)
+            os.remove(file_path)
+            return file_id.id
+        else:
+            _logger.error("File non trovato: %s", file_path)
+            return None
+        
     
     def log_files_in_directory(self):
         directory = "./photo-check/"
@@ -478,6 +625,7 @@ class VehicleCheck(models.Model):
         _logger.info(self)
         for record in self:
             _logger.info(record)
+        self.import_photo_check()
         
     def create_reminder(self, res):
         _logger.info(f"Stampo il fottuto self {res.id}")
@@ -493,7 +641,7 @@ class VehicleCheck(models.Model):
         helpdesk_id = self.env['helpdesk.team'].search_read([('organization_id', '=', cdc_id[0]['organization_id'][0])])
     
         if not helpdesk_id:
-            raise ValidationError(_("Errore nella creazione dell'anomalia e del reminder. Non sei un ROP autorizzato. Per farsi aggiungere contattare raffaele.tesolin@futurasl.com o il 351/7676798."))
+            raise ValidationError(_("Errore nella creazione dell'anomalia e del reminder. Non sei un ROP autorizzato. Per farsi aggiungere contattare raffaele.tesolin@futurasl.com o il 0431/611714."))
         
         _logger.info(cdc_id[0]['organization_id'][0])
         _logger.info(helpdesk_id)

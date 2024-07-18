@@ -12,7 +12,7 @@ class VehicleCheckImportLog(models.Model):
     _inherit = "mail.thread"
     
     name = fields.Char(string="name")
-    cam_code = fields.Many2one('fleet.check.import.log')
+    cam_code = fields.Many2one('fleet.check.cam')
     attachment_csv_id = fields.Many2one('ir.attachment')
     attachment_csv_datas = fields.Binary(compute="_compute_attachment_csv_datas")
     photo_name = fields.Char()
@@ -22,6 +22,9 @@ class VehicleCheckImportLog(models.Model):
     location_id = fields.Many2one('gtms.trip.type', string="Location")
     export_processed = fields.Boolean()
     export_error = fields.Char()
+    state = fields.Selection([('new','Insert'),('done','Done'),('error','')], default='new', store=True)
+    fleet_id = fields.Many2one('fleet.vehicle', string="Fleet")
+    trip_id = fields.Many2one('gtms.trip', string="Trip")
 
 
 

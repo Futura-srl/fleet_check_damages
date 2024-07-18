@@ -19,6 +19,9 @@
                 <field name="location_id" readonly="1"/>
                 <field name="export_processed" readonly="1"/>
                 <field name="export_error" readonly="1"/>
+                <field name="state" readonly="1"/>
+                <field name="fleet_id" readonly="1"/>
+                <field name="trip_id" readonly="1"/>
             </tree>
         </field>
     </record>
@@ -29,6 +32,9 @@
         <field name="model">fleet.check.import.log</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <field name="state"  widget="statusbar" attrs="{'clickable': False}"/>
+                </header>
                 <sheet>
                     <group>
                         <!-- <field name="name" invisible="1"/> -->
@@ -42,6 +48,8 @@
                         <field name="location_id"/>
                         <field name="export_processed"/>
                         <field name="export_error"/>
+                        <field name="fleet_id"/>
+                        <field name="trip_id"/>
                     </group>
                 </sheet>
             </form>
@@ -53,7 +61,7 @@
     <record id="fleet_check_import_log" model="ir.actions.act_window">
         <field name="name">Fleet Check Import Log</field>
         <field name="res_model">fleet.check.import.log</field>
-        <field name="view_mode">tree</field>
+        <field name="view_mode">tree,form</field>
     </record>
 
 </odoo>
