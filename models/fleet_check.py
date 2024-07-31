@@ -113,7 +113,8 @@ class VehicleCheck(models.Model):
     def _compute_datetime_trip_id(self):
         for record in self:
             test = self.env['gtms.trip'].search_read([('id', '=', record.trip_id.id)], ['first_stop_planned_at'])
-            record.datetime_trip_id = test[0]['first_stop_planned_at']
+            if test != []:
+                record.datetime_trip_id = test[0]['first_stop_planned_at']
             # _logger.info('first_stop_planned_at')
             # _logger.info(test[0]['first_stop_planned_at'])
 
@@ -518,6 +519,10 @@ class VehicleCheck(models.Model):
                             _logger.info(trip_id)
                             if len(trip_id) != 1:
                                 trip_id = None
+                            else:
+                                trip_id = trip_id.id
+
+                        
                             # '|', ('trip_start_from_survey', '<=', datetime_csv), ('trip_start_from_survey', '=', False)
                         _logger.info("Photo name: %s", photo_name)
                         _logger.info("Targa: %s, fleet_id %s", license_plate, fleet_id)
@@ -542,7 +547,7 @@ class VehicleCheck(models.Model):
                             'cam_error': errore,
                             'attachment_csv_id': file_id.id,
                             'fleet_id': fleet_id,
-                            'trip_id': trip_id.id,
+                            'trip_id': trip_id,
                         }
                         log = self.env['fleet.check.import.log'].create(data)
                         _logger.info(log)
@@ -561,12 +566,14 @@ class VehicleCheck(models.Model):
         for record in all_records:
             # Carico la foto in attachment e poi la associo al fleet_check
             foto_id = self.get_base64_photo_and_upload(record.photo_name)
+            # Recupero il valore della cam
             data = {
                 'vehicle_id': record.fleet_id.id,
                 'trip_id': record.trip_id.id,
                 'original_bool': True,
                 'fleet_check_photo_id': foto_id,
                 'name': 'test',
+                'fleet_check_photo_cam_id': record.cam_code.id,
             }
             check = self.env['fleet.check'].create(data)
             record.export_processed = True
