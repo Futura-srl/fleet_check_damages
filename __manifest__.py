@@ -1,6 +1,6 @@
 {
     'name': 'Fleet check',
-    'version': '16',
+    'version': '17.0',
     'author': "Luca Cocozza",
     'application': True,
     'description': "This module is used to manage the photos taken of the vehicles by the facility.",
