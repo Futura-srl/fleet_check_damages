@@ -51,9 +51,9 @@
             <form>
                 <header>
                     <field name="state"  widget="statusbar" options="{'clickable': '1'}"/>
-                    <button name="fleet_check_set_older" string="Danni vecchi" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'new')]}"/>
-                    <button name="fleet_check_set_no_damages" string="Nessun danno" type="object" class="oe_highlight" attrs="{'invisible': [('state', '!=', 'new')]}"/>
-                    <button name="fleet_check_reset" string="Reset" type="object" class="oe_highlight" attrs="{'invisible': [('state', '=', 'new')]}"/>
+                    <button name="fleet_check_set_older" string="Danni vecchi" type="object" class="oe_highlight" invisible="[('state', '!=', 'new')]"/>
+                    <button name="fleet_check_set_no_damages" string="Nessun danno" type="object" class="oe_highlight" invisible="[('state', '!=', 'new')]"/>
+                    <button name="fleet_check_reset" string="Reset" type="object" class="oe_highlight" invisible="[('state', '=', 'new')]"/>
                     <button name="test_fleet_check" string="TEST" type="object" class="oe_highlight"/>
                     <button name="import_photo_to_fleet_check" string="TEST2" type="object" class="oe_highlight"/>
                 </header>
@@ -104,12 +104,12 @@
                         <field name="older_damages" invisible="1"/>
                     <group class="o_row" attrs="{'invisible': [('original_bool', '=', False)]}">
                         <group string="Last trip Original" class="oe_inline">
-                                <field name="last_trip_fleet_check_photo_datas" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '!=', False)]}" nolabel="1" style="width: 350px;"/>
-                                <field name="last_trip_fleet_check_photo_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_url', '=', False)]}" nolabel="1" style="width: 350px;"/>
+                                <field name="last_trip_fleet_check_photo_datas" widget="image" invisible="[('last_trip_fleet_check_photo_url', '!=', False)]" nolabel="1" style="width: 350px;"/>
+                                <field name="last_trip_fleet_check_photo_url" widget="image_url" invisible="[('last_trip_fleet_check_photo_url', '=', False)]" nolabel="1" style="width: 350px;"/>
                         </group>
                         <group string="Original" class="oe_inline">
-                                <field name="fleet_check_photo_datas" widget="image" attrs="{'invisible': [('fleet_check_photo_url', '!=', False)]}" nolabel="1" style="width: 350px;"/>
-                                <field name="fleet_check_photo_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_url', '=', False)]}" nolabel="1" style="width: 350px;"/>
+                                <field name="fleet_check_photo_datas" widget="image" invisible="[('fleet_check_photo_url', '!=', False)]" nolabel="1" style="width: 350px;"/>
+                                <field name="fleet_check_photo_url" widget="image_url" invisible="[('fleet_check_photo_url', '=', False)]" nolabel="1" style="width: 350px;"/>
                         </group>
                         <group string="Open damages" class="oe_inline">
                             <field name="damages_open_ids" class="oe_inline" string="">
@@ -128,14 +128,14 @@
                                 <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 100px;"/>
                         </group> -->
                     </group>
-                    <group class="o_row" attrs="{'invisible': [('master_bool', '=', False)]}">
+                    <group class="o_row" invisible="[('master_bool', '=', False)]">
                         <group string="Last trip Master" class="oe_inline">
-                                <field name="last_trip_fleet_check_photo_master_datas" widget="image" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '!=', False)]}" nolabel="1" style="width: 400px;"/>
-                                <field name="last_trip_fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('last_trip_fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 400px;"/>
+                                <field name="last_trip_fleet_check_photo_master_datas" widget="image" invisible="[('last_trip_fleet_check_photo_master_url', '!=', False)]" nolabel="1" style="width: 400px;"/>
+                                <field name="last_trip_fleet_check_photo_master_url" widget="image_url" invisible="[('last_trip_fleet_check_photo_master_url', '=', False)]" nolabel="1" style="width: 400px;"/>
                         </group>
                         <group string="Master" class="oe_inline">
-                                <field name="fleet_check_photo_master_datas" widget="image" attrs="{'invisible': [('fleet_check_photo_master_url', '!=', False)]}" nolabel="1" style="width: 400px;"/>
-                                <field name="fleet_check_photo_master_url" widget="image_url" attrs="{'invisible': [('fleet_check_photo_master_url', '=', False)]}" nolabel="1" style="width: 400px;"/>
+                                <field name="fleet_check_photo_master_datas" widget="image" invisible="[('fleet_check_photo_master_url', '!=', False)]" nolabel="1" style="width: 400px;"/>
+                                <field name="fleet_check_photo_master_url" widget="image_url" invisible="[('fleet_check_photo_master_url', '=', False)]" nolabel="1" style="width: 400px;"/>
                         </group>
                         <group string="Open damages" class="oe_inline">
                             <field name="damages_open_ids" class="oe_inline" string="">
