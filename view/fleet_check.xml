@@ -102,7 +102,7 @@
                         <field name="last_trip_fleet_check_photo_id" invisible="1"/>
                         <field name="last_trip_fleet_check_photo_master_id" invisible="1"/>
                         <field name="older_damages" invisible="1"/>
-                    <group class="o_row" attrs="{'invisible': [('original_bool', '=', False)]}">
+                    <group class="o_row" invisible="[('original_bool', '=', False)]">
                         <group string="Last trip Original" class="oe_inline">
                                 <field name="last_trip_fleet_check_photo_datas" widget="image" invisible="[('last_trip_fleet_check_photo_url', '!=', False)]" nolabel="1" style="width: 350px;"/>
                                 <field name="last_trip_fleet_check_photo_url" widget="image_url" invisible="[('last_trip_fleet_check_photo_url', '=', False)]" nolabel="1" style="width: 350px;"/>
