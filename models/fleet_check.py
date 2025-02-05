@@ -2,6 +2,7 @@ from odoo import fields, models, api
 import logging
 from datetime import datetime, timedelta
 import os, csv, base64
+from odoo.exceptions import ValidationError, UserError
 
 
 _logger = logging.getLogger(__name__)
