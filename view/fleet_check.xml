@@ -35,7 +35,7 @@
                 <field name="fleet_check_photo_master_id"/>
                 <field name="trip_id"/>
                 <field name="datetime_trip_id"/>
-                <filter name="state_done" string="Remove Done" domain="state != done"/>
+                <filter name="state_done" string="Remove Done" domain="[('state', '!=', 'done')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Trip" name="trip_id" context="{'group_by': 'trip_id'}"/>
                 </group>
@@ -51,9 +51,9 @@
             <form>
                 <header>
                     <field name="state"  widget="statusbar" options="{'clickable': '1'}"/>
-                    <button name="fleet_check_set_older" string="Danni vecchi" type="object" class="oe_highlight" invisible="state != new"/>
-                    <button name="fleet_check_set_no_damages" string="Nessun danno" type="object" class="oe_highlight" invisible="state != new"/>
-                    <button name="fleet_check_reset" string="Reset" type="object" class="oe_highlight" invisible="state == new"/>
+                    <button name="fleet_check_set_older" string="Danni vecchi" type="object" class="oe_highlight" invisible="state != 'new'"/>
+                    <button name="fleet_check_set_no_damages" string="Nessun danno" type="object" class="oe_highlight" invisible="state != 'new'"/>
+                    <button name="fleet_check_reset" string="Reset" type="object" class="oe_highlight" invisible="state == 'new'"/>
                     <button name="test_fleet_check" string="TEST" type="object" class="oe_highlight"/>
                     <button name="import_photo_to_fleet_check" string="TEST2" type="object" class="oe_highlight"/>
                 </header>
