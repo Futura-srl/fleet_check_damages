@@ -7,7 +7,7 @@
         <field name="name">Fleet check import log</field>
         <field name="model">fleet.check.import.log</field>
         <field name="arch" type="xml">
-            <tree string="Fleet check import log">
+            <list string="Fleet check import log">
                 <field name="attachment_csv_datas" filename="name" widget="binary" readonly="1"/>
                 <field name="name" readonly="1" invisible="1"/>
                 <field name="cam_code" readonly="1"/>
@@ -22,7 +22,7 @@
                 <field name="state" readonly="1"/>
                 <field name="fleet_id" readonly="1"/>
                 <field name="trip_id" readonly="1"/>
-            </tree>
+            </list>
         </field>
     </record>
     
@@ -61,7 +61,7 @@
     <record id="fleet_check_import_log" model="ir.actions.act_window">
         <field name="name">Fleet Check Import Log</field>
         <field name="res_model">fleet.check.import.log</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
 </odoo>

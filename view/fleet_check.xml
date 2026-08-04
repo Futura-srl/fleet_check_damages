@@ -7,7 +7,7 @@
         <field name="name">Modulo foto check</field>
         <field name="model">fleet.check</field>
         <field name="arch" type="xml">
-            <tree string="Modulo foto check">
+            <list string="Modulo foto check">
                 <field name="id"/>
                 <field name="vehicle_id"/>
                 <field name="name"/>
@@ -17,7 +17,7 @@
                 <field name="fleet_check_photo_id"/>
                 <field name="fleet_check_photo_master_id"/>
                 <field name="trip_id"/>
-            </tree>
+            </list>
         </field>
     </record>
 
@@ -113,10 +113,10 @@
                         </group>
                         <group string="Open damages" class="oe_inline">
                             <field name="damages_open_ids" class="oe_inline" string="">
-                                <tree>
+                                <list>
                                     <field name="damage_type_id" string="Damages"/>
                                     <field name="event_date" string="Event date"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                         <!-- <t string="Master" attrs="{'invisible': [('master_bool', '=', False)]}">
@@ -139,10 +139,10 @@
                         </group>
                         <group string="Open damages" class="oe_inline">
                             <field name="damages_open_ids" class="oe_inline" string="">
-                                <tree>
+                                <list>
                                     <field name="damage_type_id" string="Damages"/>
                                     <field name="event_date" string="Event date"/>
-                                </tree>
+                                </list>
                             </field>
                         </group>
                         <!-- <div>
@@ -163,7 +163,7 @@
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">bt.hr.overtime</field>
         <field name="view_type">form</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="context">{'state':'done'}</field>
         <field name="search_view_id" ref="bt_overtime_management_search"/>
         <field name="help" type="html">
@@ -178,7 +178,7 @@
     <record id="fleet_check" model="ir.actions.act_window">
         <field name="name">Fleet Check</field>
         <field name="res_model">fleet.check</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 
     <record id="model_fleet_check_danni" model="ir.actions.server">
